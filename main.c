@@ -16,6 +16,7 @@ int ticks, x;
 float y, velocity;
 char bird = '@';
 WINDOW *main_win, *end_win;
+int win_w, win_h;
 
 struct tube {
         int x;
@@ -36,18 +37,18 @@ void draw_tube(int x, bool top, int width, int height)
 {
         int i, j, start;
 
-        if (x + width < 1)
+        if (x + width <= 1)
                 return;
-        if ((x + width) > (COLS - 2))
+        if (x >= win_w - 1)
                 return;
 
         if (top)
                 start = 1;
         else
-                start = LINES - 3 - height;
+                start = win_h - 1 - height;
 
-        if ((x + width) >= (COLS - 1)) {
-                width = width - (COLS - 7 - x);
+        if ((x + width) >= (win_w - 1)) {
+                width = width - (width - (win_w - 1 - x));
         }
 
         if (x < 1) {
@@ -55,6 +56,8 @@ void draw_tube(int x, bool top, int width, int height)
                 x = x + (1 - x);
         }
 
+        mvwprintw(main_win, start - 1, x - 1, "%d", x);
+        mvwprintw(main_win, start, x - 1, "%d", width);
 
         for (i = 0; i < height; i++) {
                 wmove(main_win, start + i, x);
@@ -71,15 +74,17 @@ void next_tube(struct tube *next, struct tube *prev)
 {
         next->top = !prev->top;
 
-        if (!prev->top)
-                next->x = prev->x + (6 + rand() % 40);
-        else
-                next->x = prev->x;
+        //if (!prev->top)
+        //        next->x = prev->x + (6 + rand() % 40);
+        //else
+        //        next->x = prev->x;
 
-        if (prev->top)
+        next->x = prev->x + 20;
+
+        if (next->top)
                 next->height = (LINES / 4) + (rand() % (LINES / 2));
         else
-                next->height = LINES - prev->height;
+                next->height = LINES - prev->height - TUBES_GAP;
 
         //if ((prev->x + prev->width + 15 > next->x)
         //    && (prev->height + next->height >= LINES))
@@ -143,6 +148,7 @@ int main(void)
 	start_color();
 
         main_win = win_create(LINES - 2, COLS - 2, 1, 1);
+        getmaxyx(main_win, win_h, win_w);
 
         ts.tv_sec = 0;
         ts.tv_nsec = 50 * 1000 * 1000;
@@ -177,6 +183,7 @@ int main(void)
                         clear();
 
                         win_resize(main_win, LINES - 2, COLS - 2);
+                        getmaxyx(main_win, win_h, win_w);
 
                         resized = false;
                 }
@@ -198,7 +205,7 @@ int main(void)
                         if (tubes[i].x + tubes[i].width < 2) {
                                 if (i == 0)
                                         next_tube(&tubes[i], &tubes[NUM_OF_TUBES - 1]);
-                                else if (i == NUM_OF_TUBES - 1)
+                                else if (i == (NUM_OF_TUBES - 1))
                                         next_tube(&tubes[i], &tubes[0]);
                                 else
                                         next_tube(&tubes[i], &tubes[i - 1]);
@@ -214,14 +221,14 @@ int main(void)
 
 
                 // draw bird
-                mvwaddch (main_win, (int)y, x, bird);
+                mvwaddch(main_win, (int)y, x, bird);
                 //x++;
                 y = y + velocity;
                 velocity += 0.1;
 
 
                 // other
-                mvwprintw (main_win, 1, COLS - 15, "%d", ticks++);
+                mvwprintw(main_win, win_h - 1, COLS - 15, "%d", ticks++);
 
                 wrefresh(main_win);
                 nanosleep(&ts, NULL);
