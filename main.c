@@ -5,12 +5,12 @@
 #include <time.h>
 #include <ncurses.h>
 
-
 #include "win.h"
 
 #define NUM_OF_TUBES 10
 #define TUBES_WIDTH 8
 #define TUBES_GAP 20
+#define TUBES_DISTANCE 30
 
 int ticks, x;
 float y, velocity;
@@ -31,7 +31,6 @@ void terminal_resize()
         resized = true;
         signal(SIGWINCH, terminal_resize);
 }
-
 
 void draw_tube(int x, bool top, int width, int height)
 {
@@ -56,8 +55,6 @@ void draw_tube(int x, bool top, int width, int height)
                 x = x + (1 - x);
         }
 
-        mvwprintw(main_win, start - 1, x - 1, "%d", x);
-
         for (i = 0; i < height; i++) {
                 wmove(main_win, start + i, x);
 
@@ -73,21 +70,15 @@ void next_tube(struct tube *next, struct tube *prev)
 {
         next->top = !prev->top;
 
-        //if (!prev->top)
-        //        next->x = prev->x + (6 + rand() % 40);
-        //else
-        //        next->x = prev->x;
-
-        next->x = prev->x + 20;
+        if (next->top)
+                next->x = prev->x + TUBES_DISTANCE;
+        else
+                next->x = prev->x;
 
         if (next->top)
-                next->height = (LINES / 4) + (rand() % (LINES / 2));
+                next->height = (win_h / 4) + (rand() % (win_h / 2));
         else
-                next->height = LINES - prev->height - TUBES_GAP;
-
-        //if ((prev->x + prev->width + 15 > next->x)
-        //    && (prev->height + next->height >= LINES))
-        //        next->height = LINES - prev->height - 15;
+                next->height = win_h - prev->height - TUBES_GAP;
 
         next->width = TUBES_WIDTH;
 }
@@ -119,7 +110,7 @@ void init_game()
 void end_game()
 {
         nodelay(main_win, false);
-        end_win = subwin(main_win, 5, 29, LINES / 2 - 2, COLS / 2 - 14);
+        end_win = subwin(main_win, 5, 29, win_h / 2 - 2, win_w / 2 - 14);
         box(end_win, ACS_VLINE, ACS_HLINE);
 
         mvwprintw(end_win, 2, 2, "You are dead, repeat? Y/n");
@@ -131,7 +122,6 @@ int main(void)
         int keycode;
         int i;
         struct timespec ts;
-
 
         setlocale(LC_ALL, "");
 	signal(SIGWINCH, terminal_resize);
@@ -150,7 +140,7 @@ int main(void)
         getmaxyx(main_win, win_h, win_w);
 
         ts.tv_sec = 0;
-        ts.tv_nsec = 50 * 1000 * 1000;
+        ts.tv_nsec = 50 * 1000 * 1000; // tick time
 
         init_game();
         nodelay(main_win, true);
@@ -188,16 +178,15 @@ int main(void)
                 }
 
                 // checks
-                if (y <= 2 || y >= LINES) {
+                if (y <= 2 || y >= win_h) {
                         end_game();
                 }
-
 
                 // draw tubes
                 for (i = 0; i < NUM_OF_TUBES; i++) {
                         if (x >= tubes[i].x && x <= (tubes[i].x + tubes[i].width)) {
-                                if ((tubes[i].top && y <= tubes[i].height)
-                                    || (!tubes[i].top && y >= LINES - 3 - tubes[i].height))
+                                if ((tubes[i].top && y <= tubes[i].height + 1)
+                                    || (!tubes[i].top && y >= win_h - 1 - tubes[i].height))
                                         end_game();
                         }
 
@@ -216,16 +205,13 @@ int main(void)
                 }
 
 
-
                 // draw bird
                 mvwaddch(main_win, (int)y, x, bird);
-                //x++;
                 y = y + velocity;
                 velocity += 0.1;
 
-
                 // other
-                mvwprintw(main_win, win_h - 1, COLS - 15, "%d", ticks++);
+                mvwprintw(main_win, win_h - 1, win_w - 15, "%d", ticks++);
 
                 wrefresh(main_win);
                 nanosleep(&ts, NULL);
