@@ -57,7 +57,6 @@ void draw_tube(int x, bool top, int width, int height)
         }
 
         mvwprintw(main_win, start - 1, x - 1, "%d", x);
-        mvwprintw(main_win, start, x - 1, "%d", width);
 
         for (i = 0; i < height; i++) {
                 wmove(main_win, start + i, x);
@@ -204,14 +203,12 @@ int main(void)
 
                         if (tubes[i].x + tubes[i].width < 2) {
                                 if (i == 0)
-                                        next_tube(&tubes[i], &tubes[NUM_OF_TUBES - 1]);
-                                else if (i == (NUM_OF_TUBES - 1))
-                                        next_tube(&tubes[i], &tubes[0]);
+                                        next_tube(&tubes[0], &tubes[NUM_OF_TUBES - 1]);
                                 else
                                         next_tube(&tubes[i], &tubes[i - 1]);
                         }
 
-                        if (tubes[i].x < (COLS - 2))
+                        if (tubes[i].x < win_w - 1)
                                draw_tube(tubes[i].x, tubes[i].top, tubes[i].width, tubes[i].height);
 
                         if (ticks % 2)
