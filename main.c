@@ -18,10 +18,11 @@
 #include <stdlib.h>
 #include <locale.h>
 #include <signal.h>
-#include "sleep.h"
-#include "curses.h"
+#include <time.h>
 
+#include "curses.h"
 #include "win.h"
+#include "sleep.h"
 
 #define NUM_OF_TUBES 10
 #define TUBES_WIDTH 8
