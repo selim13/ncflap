@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <locale.h>
 #include <signal.h>
-#include <time.h>
+#include "sleep.h"
 #include "curses.h"
 
 #include "win.h"
@@ -137,7 +137,6 @@ int main(void)
 {
         int keycode;
         int i;
-        struct timespec ts;
 
         setlocale(LC_ALL, "");
 	signal(SIGWINCH, terminal_resize);
@@ -155,12 +154,8 @@ int main(void)
         main_win = win_create(LINES - 2, COLS - 2, 1, 1);
         getmaxyx(main_win, win_h, win_w);
 
-        ts.tv_sec = 0;
-        ts.tv_nsec = 50 * 1000 * 1000; // tick time
-
         init_game();
         nodelay(main_win, true);
-
 
         while (1) {
                 keycode = wgetch(main_win);
@@ -230,7 +225,7 @@ int main(void)
                 mvwprintw(main_win, win_h - 1, win_w - 15, "%d", ticks++);
 
                 wrefresh(main_win);
-                nanosleep(&ts, NULL);
+                sleep_ms(50);
         }
 
         delwin(main_win);
