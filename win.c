@@ -14,8 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <ncurses.h>
-
+#include "curses.h"
 #include "win.h"
 
 void win_drawborder(WINDOW *win)

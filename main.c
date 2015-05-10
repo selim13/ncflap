@@ -19,7 +19,7 @@
 #include <locale.h>
 #include <signal.h>
 #include <time.h>
-#include <ncurses.h>
+#include "curses.h"
 
 #include "win.h"
 

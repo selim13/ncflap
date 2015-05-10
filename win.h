@@ -17,7 +17,7 @@
 #ifndef __WIN_H_
 #define __WIN_H_
 
-#include <ncurses.h>
+#include "curses.h"
 
 #define WIN_DEBUG 1
 
