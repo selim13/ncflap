@@ -117,8 +117,8 @@ void init_game()
 {
         ticks = 0;
         x = 10;
-        y = 10.0;
-        velocity = 0.1;
+        y = (float)win_h / 2;
+        velocity = 0.1f;
 
         generate_tubes();
 }
