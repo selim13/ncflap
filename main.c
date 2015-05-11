@@ -16,11 +16,14 @@
 
 #include <stdbool.h>
 #include <stdlib.h>
-#include <locale.h>
-#include <signal.h>
 #include <time.h>
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
+#include <windows.h>
+#endif
+
 #include "curses.h"
+#include "term.h"
 #include "win.h"
 #include "sleep.h"
 
@@ -41,13 +44,6 @@ struct tube {
         int width;
         int height;
 } tubes[NUM_OF_TUBES];
-
-static bool resized = false;
-void terminal_resize()
-{
-        resized = true;
-        signal(SIGWINCH, terminal_resize);
-}
 
 void draw_tube(int x, bool top, int width, int height)
 {
@@ -136,21 +132,11 @@ void end_game()
 
 int main(void)
 {
-        int keycode;
-        int i;
+        int keycode, i;
 
-        setlocale(LC_ALL, "");
-	signal(SIGWINCH, terminal_resize);
         srand(time(NULL));
 
-	initscr();
-	cbreak();
-	noecho();
-	nonl();
-	intrflush(stdscr, false);
-	keypad(stdscr, true);
-	curs_set(0);
-	start_color();
+        term_init();
 
         main_win = win_create(LINES - 2, COLS - 2, 1, 1);
         getmaxyx(main_win, win_h, win_w);
@@ -178,15 +164,9 @@ int main(void)
                 }
 
                 // handle window resize
-                if (resized) {
-                        endwin();
-                        refresh();
-                        clear();
-
+                if (term_resized()) {
                         win_resize(main_win, LINES - 2, COLS - 2);
                         getmaxyx(main_win, win_h, win_w);
-
-                        resized = false;
                 }
 
                 // checks
