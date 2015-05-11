@@ -29,7 +29,7 @@
 
 #define NUM_OF_TUBES 10
 #define TUBES_WIDTH 8
-#define TUBES_GAP 20
+#define TUBES_GAP 10
 #define TUBES_DISTANCE 30
 
 int ticks, x;
@@ -200,7 +200,7 @@ int main(void)
                 // draw bird
                 mvwaddch(main_win, (int)y, x, bird);
                 y = y + velocity;
-                velocity += 0.1;
+                velocity += 0.1f;
 
                 // other
                 mvwprintw(main_win, win_h - 1, win_w - 15, "%d", ticks++);
